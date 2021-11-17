@@ -466,3 +466,10 @@ class SwinMLP(nn.Module):
         flops += self.num_features * self.patches_resolution[0] * self.patches_resolution[1] // (2 ** self.num_layers)
         flops += self.num_features * self.num_classes
         return flops
+
+
+if __name__ == "__main__":
+    bs, c, w, h = 10, 3, 224, 224
+    data = torch.randn(bs, c, w, h)
+    trans = SwinMLP()
+    out = trans(data)
