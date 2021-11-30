@@ -55,3 +55,8 @@ def check_keywords_in_name(name, keywords=()):
         if keyword in name:
             isin = True
     return isin
+
+if __name__ == "__main__":
+    from models.swin_transformer import SwinTransformer
+    model = SwinTransformer(ape=True)
+    opt = build_optimizer(None ,model)

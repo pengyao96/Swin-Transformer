@@ -126,3 +126,24 @@ def build_transform(is_train, config):
     t.append(transforms.ToTensor())
     t.append(transforms.Normalize(IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD))
     return transforms.Compose(t)
+
+
+if __name__ == "__main__":
+    from config import _C
+    import torch
+    import numpy as np
+    import random
+
+    seed = 1
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    torch.backends.cudnn.deterministic = True
+
+    dataset_train, dataset_val, data_loader_train, data_loader_val, mixup_fn = build_loader(config=_C)
+    for idx, data in enumerate(data_loader_train):
+        print(idx, data[0].sum())
+
+    for idx, data in enumerate(data_loader_val):
+        print(idx, data[0].sum())

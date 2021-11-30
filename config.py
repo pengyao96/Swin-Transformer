@@ -21,7 +21,7 @@ _C.DATA = CN()
 # Batch size for a single GPU, could be overwritten by command line argument
 _C.DATA.BATCH_SIZE = 128
 # Path to dataset, could be overwritten by command line argument
-_C.DATA.DATA_PATH = ''
+_C.DATA.DATA_PATH = '/Users/yaopeng/Documents/code/open-sources/nas_server/data_demo/imagenet'
 # Dataset name
 _C.DATA.DATASET = 'imagenet'
 # Input image size
@@ -246,3 +246,9 @@ def get_config(args):
     update_config(config, args)
 
     return config
+
+if __name__ == '__main__':
+    from main import parse_option
+    _, config = parse_option()
+    result = get_config(_C)
+    print(result)

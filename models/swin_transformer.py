@@ -585,8 +585,26 @@ class SwinTransformer(nn.Module):
         return flops
 
 
-if __name__ == "__main__":
-    bs, c, w, h = 10, 3, 224, 224
-    data = torch.randn(bs, c, w, h)
-    trans = SwinTransformer()
-    out = trans(data)
+
+if __name__ == '__main__':
+    import torch
+
+    inputs = torch.ones(size=[1, 3, 224,224], dtype=torch.float32)
+    op = SwinTransformer()
+    result = op(inputs)
+    print(result.shape)
+    from thop import profile
+
+    flops, params = profile(op, inputs=(inputs,))
+    print("Thop Param %d" % params)
+    print("Thop Madds %d" % flops)
+
+    # self_param = op.params
+    self_madds = op.flops()
+    # print("Self Param %d" % self_param)
+    print("Self Madds %d" % self_madds)
+
+
+
+    print("Done!")
+

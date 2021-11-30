@@ -345,3 +345,5 @@ if __name__ == '__main__':
     logger.info(config.dump())
 
     main(config)
+
+#python main.py --cfg configs/swin_tiny_patch4_window7_224.yaml --batch-size 1
