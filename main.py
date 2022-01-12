@@ -246,7 +246,7 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
                 f'loss {loss_meter.val:.4f} ({loss_meter.avg:.4f})\t'
                 f'grad_norm {norm_meter.val:.4f} ({norm_meter.avg:.4f})\t'
                 f'mem {memory_used:.0f}MB')
-            logger.info(f"compression ratio: {skip_optimizer.resource_fn(w=model.nas_weights).detach().cpu().numpy()}")
+            logger.info(f"compression ratio: {skip_optimizer.resource_fn(w=model.module.nas_weights).detach().cpu().numpy()}")
     epoch_time = time.time() - start
     logger.info(f"EPOCH {epoch} training takes {datetime.timedelta(seconds=int(epoch_time))}")
 
