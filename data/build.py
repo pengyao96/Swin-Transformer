@@ -13,10 +13,26 @@ from torchvision import datasets, transforms
 from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 from timm.data import Mixup
 from timm.data import create_transform
-from timm.data.transforms import _pil_interp
 
 from .cached_image_folder import CachedImageFolder
 from .samplers import SubsetRandomSampler
+
+try:
+    from torchvision.transforms import InterpolationMode
+
+
+    def _pil_interp(method):
+        if method == 'bicubic':
+            return InterpolationMode.BICUBIC
+        elif method == 'lanczos':
+            return InterpolationMode.LANCZOS
+        elif method == 'hamming':
+            return InterpolationMode.HAMMING
+        else:
+            # default bilinear, do we want to allow nearest?
+            return InterpolationMode.BILINEAR
+except:
+    from timm.data.transforms import _pil_interp
 
 
 def build_loader(config):
@@ -37,8 +53,12 @@ def build_loader(config):
             dataset_train, num_replicas=num_tasks, rank=global_rank, shuffle=True
         )
 
-    indices = np.arange(dist.get_rank(), len(dataset_val), dist.get_world_size())
-    sampler_val = SubsetRandomSampler(indices)
+    if config.TEST.SEQUENTIAL:
+        sampler_val = torch.utils.data.SequentialSampler(dataset_val)
+    else:
+        sampler_val = torch.utils.data.distributed.DistributedSampler(
+            dataset_val, shuffle=False
+        )
 
     data_loader_train = torch.utils.data.DataLoader(
         dataset_train, sampler=sampler_train,
@@ -82,6 +102,8 @@ def build_dataset(is_train, config):
             root = os.path.join(config.DATA.DATA_PATH, prefix)
             dataset = datasets.ImageFolder(root, transform=transform)
         nb_classes = 1000
+    elif config.DATA.DATASET == 'imagenet22K':
+        raise NotImplementedError("Imagenet-22K will come soon.")
     else:
         raise NotImplementedError("We only support ImageNet Now.")
 
