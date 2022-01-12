@@ -591,6 +591,9 @@ if __name__ == '__main__':
 
     inputs = torch.ones(size=[1, 3, 224,224], dtype=torch.float32)
     op = SwinTransformer()
+
+
+
     result = op(inputs)
     print(result.shape)
     from thop import profile
