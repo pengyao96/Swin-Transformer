@@ -26,6 +26,7 @@ from lr_scheduler import build_scheduler
 from optimizer import build_optimizer
 from logger import create_logger
 from utils import load_checkpoint, load_pretrained, save_checkpoint, get_grad_norm, auto_resume_helper, reduce_tensor
+from ipdb import set_trace as st
 
 try:
     # noinspection PyUnresolvedReferences
@@ -83,6 +84,13 @@ def main(config):
     model = build_model(config)
     model.cuda()
     logger.info(str(model))
+    ## ============================ add hammer step 1 ============================
+    st()
+    from hammer.open_api.hammer_prune import nasOptimizer
+    from models.swin_transformer import SwinTransformerBlock
+    fake_inputs = [x.cuda() for x in [torch.randn(1, 3, 224, 224)]]
+    skip_optimizer = nasOptimizer(model, SwinTransformerBlock, inputs=fake_inputs)
+    ## ============================ add hammer step 1 ============================
 
     optimizer = build_optimizer(config, model)
     if config.AMP_OPT_LEVEL != "O0":
@@ -141,7 +149,8 @@ def main(config):
     for epoch in range(config.TRAIN.START_EPOCH, config.TRAIN.EPOCHS):
         data_loader_train.sampler.set_epoch(epoch)
 
-        train_one_epoch(config, model, criterion, data_loader_train, optimizer, epoch, mixup_fn, lr_scheduler)
+        train_one_epoch(config, model, criterion, data_loader_train, optimizer, epoch, mixup_fn, lr_scheduler,
+                        skip_optimizer)
         if dist.get_rank() == 0 and (epoch % config.SAVE_FREQ == 0 or epoch == (config.TRAIN.EPOCHS - 1)):
             save_checkpoint(config, epoch, model_without_ddp, max_accuracy, optimizer, lr_scheduler, logger)
 
@@ -155,7 +164,8 @@ def main(config):
     logger.info('Training time {}'.format(total_time_str))
 
 
-def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mixup_fn, lr_scheduler):
+def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mixup_fn, lr_scheduler,
+                    skip_optimizer=None):
     model.train()
     optimizer.zero_grad()
 
@@ -213,6 +223,11 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
                     grad_norm = get_grad_norm(model.parameters())
             optimizer.step()
             lr_scheduler.step_update(epoch * num_steps + idx)
+            ## ============================ add hammer step 2 ============================
+            st()
+            task = (samples, model, targets, criterion)
+            skip_optimizer.update(task=task)
+            ## ============================ add hammer step 2 ============================
 
         torch.cuda.synchronize()
 
@@ -232,6 +247,7 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
                 f'loss {loss_meter.val:.4f} ({loss_meter.avg:.4f})\t'
                 f'grad_norm {norm_meter.val:.4f} ({norm_meter.avg:.4f})\t'
                 f'mem {memory_used:.0f}MB')
+            logger.info(f"compression ratio: {skip_optimizer.resource_fn(w=model.nas_weights).detach().cpu().numpy()}")
     epoch_time = time.time() - start
     logger.info(f"EPOCH {epoch} training takes {datetime.timedelta(seconds=int(epoch_time))}")
 

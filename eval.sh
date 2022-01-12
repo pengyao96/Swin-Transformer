@@ -11,7 +11,5 @@ resume="swin_small_patch4_window7_224.pth"
 
 
 data_path="/imagenet/imagenet/ILSVRC/Data/CLS-LOC"
-
-
 python -m torch.distributed.launch --nproc_per_node 8 --master_port 12345 main.py --eval \
 --cfg configs/${config_name} --resume ${resume}  --data-path ${data_path}
