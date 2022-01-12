@@ -89,6 +89,7 @@ def main(config):
     # from models.swin_transformer import SwinTransformerBlock
     # fake_inputs = [x.cuda() for x in [torch.randn(1, 3, 224, 224)]]
     # skip_optimizer = nasOptimizer(model, SwinTransformerBlock, inputs=fake_inputs)
+    skip_optimizer=None
     ## ============================ add hammer step 1 ============================
 
     optimizer = build_optimizer(config, model)
