@@ -85,7 +85,6 @@ def main(config):
     model.cuda()
     logger.info(str(model))
     ## ============================ add hammer step 1 ============================
-    st()
     from hammer.open_api.hammer_prune import nasOptimizer
     from models.swin_transformer import SwinTransformerBlock
     fake_inputs = [x.cuda() for x in [torch.randn(1, 3, 224, 224)]]
@@ -134,7 +133,6 @@ def main(config):
         logger.info(f"Accuracy of the network on the {len(dataset_val)} test images: {acc1:.1f}%")
         if config.EVAL_MODE:
             return
-    st()
     if config.MODEL.PRETRAINED and (not config.MODEL.RESUME):
         load_pretrained(config, model_without_ddp, logger)
         acc1, acc5, loss = validate(config, data_loader_val, model)
@@ -224,7 +222,6 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
             optimizer.step()
             lr_scheduler.step_update(epoch * num_steps + idx)
             ## ============================ add hammer step 2 ============================
-            st()
             task = (samples, model, targets, criterion)
             skip_optimizer.update(task=task)
             ## ============================ add hammer step 2 ============================
