@@ -84,12 +84,6 @@ def main(config):
     model = build_model(config)
     model.cuda()
     logger.info(str(model))
-    ## ============================ add hammer step 1 ============================
-    from hammer.open_api.hammer_prune import nasOptimizer
-    from models.swin_transformer import SwinTransformerBlock
-    fake_inputs = [x.cuda() for x in [torch.randn(1, 3, 224, 224)]]
-    skip_optimizer = nasOptimizer(model, SwinTransformerBlock, inputs=fake_inputs)
-    ## ============================ add hammer step 1 ============================
 
     optimizer = build_optimizer(config, model)
     if config.AMP_OPT_LEVEL != "O0":
@@ -141,6 +135,14 @@ def main(config):
     if config.THROUGHPUT_MODE:
         throughput(data_loader_val, model, logger)
         return
+
+    ## ============================ add hammer step 1 ============================
+    from hammer.open_api.hammer_prune import nasOptimizer
+    from models.swin_transformer import SwinTransformerBlock
+    fake_inputs = [x.cuda() for x in [torch.randn(1, 3, 224, 224)]]
+    skip_optimizer = nasOptimizer(model_without_ddp, SwinTransformerBlock, inputs=fake_inputs)
+    ## ============================ add hammer step 1 ============================
+
 
     logger.info("Start training")
     start_time = time.time()
