@@ -229,11 +229,11 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
             ## ============================ add hammer step 2 ============================
 
         torch.cuda.synchronize()
-
-        loss_meter.update(loss.item(), targets.size(0))
-        norm_meter.update(grad_norm)
-        batch_time.update(time.time() - end)
-        end = time.time()
+        if not np.isnan(grad_norm):
+            loss_meter.update(loss.item(), targets.size(0))
+            norm_meter.update(grad_norm)
+            batch_time.update(time.time() - end)
+            end = time.time()
 
         if idx % config.PRINT_FREQ == 0:
             lr = optimizer.param_groups[0]['lr']
