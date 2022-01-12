@@ -229,7 +229,7 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
             ## ============================ add hammer step 2 ============================
 
         torch.cuda.synchronize()
-        if not np.isnan(grad_norm.cpu()):
+        if not np.isnan(grad_norm.detach().cpu().numpy()):
             loss_meter.update(loss.item(), targets.size(0))
             norm_meter.update(grad_norm)
             batch_time.update(time.time() - end)
