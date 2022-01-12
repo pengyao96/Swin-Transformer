@@ -85,11 +85,10 @@ def main(config):
     model.cuda()
     logger.info(str(model))
     ## ============================ add hammer step 1 ============================
-    # from hammer.open_api.hammer_prune import nasOptimizer
-    # from models.swin_transformer import SwinTransformerBlock
-    # fake_inputs = [x.cuda() for x in [torch.randn(1, 3, 224, 224)]]
-    # skip_optimizer = nasOptimizer(model, SwinTransformerBlock, inputs=fake_inputs)
-    skip_optimizer=None
+    from hammer.open_api.hammer_prune import nasOptimizer
+    from models.swin_transformer import SwinTransformerBlock
+    fake_inputs = [x.cuda() for x in [torch.randn(1, 3, 224, 224)]]
+    skip_optimizer = nasOptimizer(model, SwinTransformerBlock, inputs=fake_inputs)
     ## ============================ add hammer step 1 ============================
 
     optimizer = build_optimizer(config, model)
