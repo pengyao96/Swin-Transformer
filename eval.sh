@@ -1,4 +1,7 @@
-config_name="swin_tiny_patch4_window7_224.yaml"
+#config_name="swin_tiny_patch4_window7_224.yaml"
+config_name="swin_small_patch4_window7_224.yaml"
+#config_name="swin_base_patch4_window7_224.yaml"
+
 data_path="/imagenet/imagenet/ILSVRC/Data/CLS-LOC"
 
 
