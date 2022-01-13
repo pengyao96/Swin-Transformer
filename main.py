@@ -25,7 +25,7 @@ from data import build_loader
 from lr_scheduler import build_scheduler
 from optimizer import build_optimizer
 from logger import create_logger
-from utils import load_checkpoint, load_pretrained, save_checkpoint, get_grad_norm, auto_resume_helper, reduce_tensor
+from utils import load_checkpoint, load_pretrained, save_checkpoint, get_grad_norm, auto_resume_helper, reduce_tensor, hammer_save_checkpoint
 from ipdb import set_trace as st
 
 try:
@@ -246,7 +246,12 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
                 f'loss {loss_meter.val:.4f} ({loss_meter.avg:.4f})\t'
                 f'grad_norm {norm_meter.val:.4f} ({norm_meter.avg:.4f})\t'
                 f'mem {memory_used:.0f}MB')
-            logger.info(f"compression ratio: {skip_optimizer.resource_fn(w=model.module.nas_weights).detach().cpu().numpy()}")
+            ## ============================ add hammer step 3 ============================
+            rate = skip_optimizer.resource_fn(w=model.module.nas_weights).detach().cpu().numpy()
+            logger.info(f"compression ratio: {rate}")
+            if dist.get_rank() == 0:
+                hammer_save_checkpoint(config, epoch, idx, rate, model, optimizer, lr_scheduler, logger)
+            ## ============================ add hammer step 3 ============================
     epoch_time = time.time() - start
     logger.info(f"EPOCH {epoch} training takes {datetime.timedelta(seconds=int(epoch_time))}")
 

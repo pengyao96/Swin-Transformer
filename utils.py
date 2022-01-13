@@ -148,6 +148,19 @@ def save_checkpoint(config, epoch, model, max_accuracy, optimizer, lr_scheduler,
     torch.save(save_state, save_path)
     logger.info(f"{save_path} saved !!!")
 
+def hammer_save_checkpoint(config, epoch, iter, rate, model, optimizer, lr_scheduler, logger):
+    save_state = {'model': model.state_dict(),
+                  'optimizer': optimizer.state_dict(),
+                  'lr_scheduler': lr_scheduler.state_dict(),
+                  'config': config}
+    if config.AMP_OPT_LEVEL != "O0":
+        save_state['amp'] = amp.state_dict()
+
+    save_path = os.path.join(config.OUTPUT, f'ckpt_epoch_{epoch}_{iter}_{rate}.pth')
+    logger.info(f"{save_path} saving......")
+    torch.save(save_state, save_path)
+    logger.info(f"{save_path} saved !!!")
+
 
 def get_grad_norm(parameters, norm_type=2):
     if isinstance(parameters, torch.Tensor):
