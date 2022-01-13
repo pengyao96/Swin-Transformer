@@ -247,7 +247,7 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
                 f'grad_norm {norm_meter.val:.4f} ({norm_meter.avg:.4f})\t'
                 f'mem {memory_used:.0f}MB')
             ## ============================ add hammer step 3 ============================
-            rate = skip_optimizer.resource_fn(w=model.module.nas_weights).detach().cpu().numpy()
+            rate = round(skip_optimizer.resource_fn(w=model.module.nas_weights).detach().cpu().numpy(), 4)
             logger.info(f"compression ratio: {rate}")
             if dist.get_rank() == 0:
                 hammer_save_checkpoint(config, epoch, idx, rate, model, optimizer, lr_scheduler, logger)
